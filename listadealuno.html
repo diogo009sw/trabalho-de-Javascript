@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de Aluno</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  margin: 5px 0;
+  padding: 10px;
+  border: 1px solid #283197;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.concluida {
+  text-decoration: line-through;
+  color: rgb(102, 102, 102);
+}
+</style>
+
+</head>
+
+<body>
+<h2>Lista de Aluno</h2>
+<input type="text" id="tarefaInput" placeholder="Digite o nome do(a) Aluno(a)">
+<input type="number" id="numeroInput" placeholder="Número da chamada">
+<button onclick="adicionarTarefa()">Adicionar</button>
+<button onclick="limparTarefas()">Limpar Tudo</button>
+
+<ul id="listaTarefas"></ul>
+
+<script>
+document.addEventListener("DOMContentLoaded", carregarTarefas);
+
+function adicionarTarefa() {
+  let inputTarefa = document.getElementById("tarefaInput");
+  let inputNumero = document.getElementById("numeroInput");
+
+  let texto = inputTarefa.value.trim();
+  let numero = inputNumero.value.trim();
+
+  if (texto === "" || numero === "") return;
+
+  let tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
+  tarefas.push({ texto, numero, concluida: false });
+  localStorage.setItem("tarefas", JSON.stringify(tarefas));
+
+  inputTarefa.value = "";
+  inputNumero.value = "";
+  renderizarTarefas();
+}
+
+function carregarTarefas() {
+  renderizarTarefas();
+}
+
+function renderizarTarefas() {
+  let lista = document.getElementById("listaTarefas");
+  lista.innerHTML = "";
+
+  let tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
+
+  tarefas.forEach((tarefa, index) => {
+    let li = document.createElement("li");
+    li.textContent = `${tarefa.numero} - ${tarefa.texto}`;
+    if (tarefa.concluida) li.classList.add("concluida");
+
+    li.onclick = function () {
+      tarefas[index].concluida = !tarefas[index].concluida;
+      localStorage.setItem("tarefas", JSON.stringify(tarefas));
+      renderizarTarefas();
+    };
+
+    let btnRemover = document.createElement("button");
+    btnRemover.textContent = "X";
+    btnRemover.onclick = function (event) {
+      event.stopPropagation();
+      tarefas.splice(index, 1);
+      localStorage.setItem("tarefas", JSON.stringify(tarefas));
+      renderizarTarefas();
+    };
+
+    btnRemover.style.marginLeft = "10px";
+    li.appendChild(btnRemover);
+    lista.appendChild(li);
+  });
+}
+
+function limparTarefas() {
+  localStorage.removeItem("tarefas");
+  renderizarTarefas();
+}
+</script>
+</body>
+</html>
